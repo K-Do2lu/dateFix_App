@@ -1,0 +1,155 @@
+import cors from 'cors'
+import express from 'express'
+import { existsSync } from 'node:fs'
+import { networkInterfaces } from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { randomUUID } from 'node:crypto'
+import { getRoomBundle, listRooms, putRoomBundle } from './db.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const distPath = path.join(__dirname, '..', 'dist')
+const isProduction = process.env.NODE_ENV === 'production' || existsSync(distPath)
+
+const app = express()
+const PORT = Number(process.env.PORT) || 3001
+const HOST = process.env.HOST || '0.0.0.0'
+
+app.use(cors())
+app.use(express.json({ limit: '1mb' }))
+
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true })
+})
+
+/** 방 목록 (메인 화면) */
+app.get('/api/rooms', (_req, res) => {
+  const bundles = listRooms()
+  const items = bundles
+    .map((b) => ({
+      id: b.room.id,
+      title: b.room.title || '우리 모임',
+      createdAt: b.room.createdAt,
+      participantCount: Object.keys(b.participants).length,
+      candidateDayCount: b.room.candidateDates.length,
+      meeting: b.room.meeting ?? null,
+    }))
+    .sort((a, b) => b.createdAt - a.createdAt)
+  res.json(items)
+})
+
+/** 방 생성 */
+app.post('/api/rooms', (req, res) => {
+  const { title, candidateDates, hostName } = req.body ?? {}
+  if (!Array.isArray(candidateDates) || candidateDates.length === 0) {
+    res.status(400).json({ error: 'candidateDates required' })
+    return
+  }
+
+  const roomId = randomUUID()
+  const room = {
+    id: roomId,
+    title: String(title ?? '').trim() || '우리 모임',
+    candidateDates: [...new Set(candidateDates)].sort(),
+    createdAt: Date.now(),
+  }
+
+  const bundle = { room, participants: {} }
+
+  if (hostName && String(hostName).trim()) {
+    const participantId = randomUUID()
+    bundle.participants[participantId] = {
+      id: participantId,
+      name: String(hostName).trim(),
+      availableDates: [],
+    }
+    putRoomBundle(bundle)
+    res.status(201).json({
+      bundle,
+      profile: { participantId, name: bundle.participants[participantId].name },
+    })
+    return
+  }
+
+  putRoomBundle(bundle)
+  res.status(201).json({ bundle })
+})
+
+app.get('/api/rooms/:roomId', (req, res) => {
+  const bundle = getRoomBundle(req.params.roomId)
+  if (!bundle) {
+    res.status(404).json({ error: 'Room not found' })
+    return
+  }
+  res.json(bundle)
+})
+
+/** 방 전체 저장 (참가자·날짜 동기화) */
+app.put('/api/rooms/:roomId', (req, res) => {
+  const bundle = req.body
+  if (!bundle?.room?.id || bundle.room.id !== req.params.roomId) {
+    res.status(400).json({ error: 'Invalid bundle' })
+    return
+  }
+  putRoomBundle(bundle)
+  res.json(bundle)
+})
+
+/** 방 입장 (새 참가자) */
+app.post('/api/rooms/:roomId/join', (req, res) => {
+  const bundle = getRoomBundle(req.params.roomId)
+  if (!bundle) {
+    res.status(404).json({ error: 'Room not found' })
+    return
+  }
+
+  const name = String(req.body?.name ?? '').trim() || '익명'
+  const participantId = randomUUID()
+  const next = {
+    ...bundle,
+    participants: {
+      ...bundle.participants,
+      [participantId]: { id: participantId, name, availableDates: [] },
+    },
+  }
+  putRoomBundle(next)
+  res.json({
+    bundle: next,
+    profile: { participantId, name },
+  })
+})
+
+if (isProduction) {
+  app.use(express.static(distPath, { index: false, maxAge: '1d' }))
+  app.get(/^(?!\/api).*/, (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'))
+  })
+}
+
+function printLanUrls(port) {
+  const urls = []
+  for (const ifaces of Object.values(networkInterfaces())) {
+    if (!ifaces) {
+      continue
+    }
+    for (const iface of ifaces) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        urls.push(`http://${iface.address}:${port}`)
+      }
+    }
+  }
+  if (urls.length > 0) {
+    console.log('같은 Wi-Fi에서 폰으로 접속 (설치는 HTTPS 배포 URL 권장):')
+    for (const url of urls) {
+      console.log(`  ${url}`)
+    }
+  }
+}
+
+app.listen(PORT, HOST, () => {
+  console.log(`Date Fix ${isProduction ? 'production' : 'API'} http://localhost:${PORT}`)
+  if (isProduction) {
+    printLanUrls(PORT)
+    console.log('PC에서 앱 설치: Chrome 주소창 오른쪽 「설치」 또는 하단 설치 배너')
+  }
+})
