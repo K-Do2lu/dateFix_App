@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'pwa-icon.svg'],
+      includeAssets: ['favicon.svg', 'images/mascot.png'],
       manifest: {
         name: 'Date Fix',
         short_name: 'Date Fix',
@@ -23,15 +23,15 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: 'pwa-icon.svg',
+            src: 'images/mascot.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any',
           },
           {
-            src: 'pwa-icon.svg',
+            src: 'images/mascot.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'maskable',
           },
         ],

@@ -74,7 +74,7 @@ export function InstallPrompt() {
         aria-label="앱 설치 안내"
       >
         <div className="cute-card flex items-center gap-3 p-4 shadow-lg">
-          <img src="/pwa-icon.svg" alt="" className="size-12 shrink-0 rounded-2xl" aria-hidden />
+          <img src="/images/mascot.png" alt="" className="size-12 shrink-0 rounded-2xl object-contain" aria-hidden />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-neutral-900">Date Fix 설치</p>
             <p className="mt-0.5 text-xs text-neutral-500">홈 화면에 추가하고 앱처럼 쓸 수 있어요</p>

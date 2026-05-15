@@ -9,7 +9,7 @@ import { getRoomBundle, listRooms, putRoomBundle } from './db.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distPath = path.join(__dirname, '..', 'dist')
-const isProduction = process.env.NODE_ENV === 'production' || existsSync(distPath)
+const hasWebBuild = existsSync(path.join(distPath, 'index.html'))
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
@@ -119,10 +119,21 @@ app.post('/api/rooms/:roomId/join', (req, res) => {
   })
 })
 
-if (isProduction) {
+if (hasWebBuild) {
   app.use(express.static(distPath, { index: false, maxAge: '1d' }))
   app.get(/^(?!\/api).*/, (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'))
+  })
+} else {
+  app.get('/', (_req, res) => {
+    res.status(200).type('html').send(`<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>Date Fix</title></head>
+<body style="font-family:sans-serif;max-width:28rem;margin:2rem auto;padding:0 1rem;line-height:1.6">
+<h1>Date Fix</h1>
+<p><strong>개발 모드</strong>에서는 Vite 주소로 열어 주세요.</p>
+<p><a href="http://localhost:5173" style="color:#3da882;font-weight:bold">http://localhost:5173</a></p>
+<p>앱 설치·배포용은 터미널에서 <code>npm run start</code> 후 이 주소(3001)를 사용하세요.</p>
+</body></html>`)
   })
 }
 
@@ -147,8 +158,11 @@ function printLanUrls(port) {
 }
 
 app.listen(PORT, HOST, () => {
-  console.log(`Date Fix ${isProduction ? 'production' : 'API'} http://localhost:${PORT}`)
-  if (isProduction) {
+  console.log(`Date Fix ${hasWebBuild ? 'app' : 'API only'} http://localhost:${PORT}`)
+  if (!hasWebBuild) {
+    console.log('웹 UI: npm run dev → http://localhost:5173  |  설치용: npm run start → http://localhost:3001')
+  }
+  if (hasWebBuild) {
     printLanUrls(PORT)
     console.log('PC에서 앱 설치: Chrome 주소창 오른쪽 「설치」 또는 하단 설치 배너')
   }
