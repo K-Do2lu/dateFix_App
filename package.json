@@ -10,6 +10,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "start": "npm run build && node server/index.js",
+    "generate-vapid": "node scripts/generate-vapid.mjs",
     "start:server": "node server/index.js"
   },
   "devDependencies": {
@@ -25,9 +26,11 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.15.1"
+    "react-router-dom": "^7.15.1",
+    "web-push": "^3.6.7"
   }
 }

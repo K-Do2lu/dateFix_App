@@ -5,9 +5,11 @@ import { CuteButtonLink } from '../../../components/ui/CuteButtonLink'
 import { AvailabilityGrid } from '../components/AvailabilityGrid'
 import { RoomHeader } from '../components/RoomHeader'
 import { RoomInviteBar } from '../components/RoomInviteBar'
+import { PushPermissionCard } from '../components/PushPermissionCard'
 import { RoomMeetingCard } from '../components/RoomMeetingCard'
 import { useRoomBundle } from '../hooks/useRoomBundle'
 import { parseLocalDate } from '../lib/dates'
+import { notifyFriendsOverlapScheduling } from '../lib/roomActivityNotify'
 import {
   getLocalProfile,
   joinRoomAsParticipant,
@@ -73,6 +75,13 @@ export function RoomPage() {
     }
     return `${window.location.origin}/room/${roomId}`
   }, [roomId])
+
+  const notifyOverlap = useCallback(() => {
+    if (!roomId || !profile || !me?.name) {
+      return
+    }
+    notifyFriendsOverlapScheduling(roomId, profile.participantId, me.name)
+  }, [roomId, profile, me?.name])
 
   const copyInvite = useCallback(async () => {
     if (!inviteUrl) {
@@ -208,12 +217,9 @@ export function RoomPage() {
           {meeting && roomId ? (
             <RoomMeetingCard meeting={meeting} roomId={roomId} compact />
           ) : null}
-          <RoomInviteBar
-            inviteUrl={inviteUrl}
-            copyState={copyState}
-            onCopy={copyInvite}
-            participantCount={participantCount}
-          />
+          {profile && roomId ? (
+            <PushPermissionCard roomId={roomId} participantId={profile.participantId} />
+          ) : null}
         </section>
 
         <section className="mt-2 px-4">
@@ -229,6 +235,15 @@ export function RoomPage() {
             onPrevMonth={goPrevMonth}
             onNextMonth={goNextMonth}
             onToggle={onToggle}
+          />
+        </section>
+
+        <section className="mt-4 px-4">
+          <RoomInviteBar
+            inviteUrl={inviteUrl}
+            copyState={copyState}
+            onCopy={copyInvite}
+            participantCount={participantCount}
           />
         </section>
 
@@ -249,6 +264,7 @@ export function RoomPage() {
               variant="accent"
               size="lg"
               className="mt-2 flex flex-col gap-1 py-4"
+              onClick={notifyOverlap}
             >
               <span className="text-base font-semibold text-white">만날 날 정하기</span>
               <span className="text-xs font-medium text-white/85">

@@ -12,10 +12,20 @@ export type Room = {
   meeting?: RoomMeeting | null
 }
 
+export type PushSubscriptionJSON = {
+  endpoint: string
+  keys: {
+    p256dh: string
+    auth: string
+  }
+  expirationTime?: number | null
+}
+
 export type Participant = {
   id: string
   name: string
   availableDates: string[]
+  pushSubscription?: PushSubscriptionJSON | null
 }
 
 export type RoomBundle = {

@@ -7,6 +7,10 @@ import { useRoomBundle } from '../hooks/useRoomBundle'
 import { formatDateLabel } from '../lib/dates'
 import { computeEveryoneFreeDates } from '../lib/overlap'
 import type { MeetingTimeSlot } from '../lib/meetingTimeSlots'
+import {
+  notifyFriendsMeetingConfirmed,
+  notifyFriendsOverlapScheduling,
+} from '../lib/roomActivityNotify'
 import { clearRoomMeeting, confirmRoomMeeting, getLocalProfile } from '../lib/roomStore'
 import type { Participant, RoomMeeting } from '../types'
 
@@ -45,6 +49,17 @@ export function RoomOverlapPage() {
       setPhase(overlap.length > 0 ? 'schedule' : 'summary')
     }
   }, [bundle?.room.id, bundle?.room.meeting, overlap.length])
+
+  useEffect(() => {
+    if (!roomId || !profile || !bundle || phase === 'celebrate') {
+      return
+    }
+    const name = bundle.participants[profile.participantId]?.name
+    if (!name) {
+      return
+    }
+    notifyFriendsOverlapScheduling(roomId, profile.participantId, name)
+  }, [roomId, profile?.participantId, bundle?.room.id, phase])
 
   const handleSelectDate = (iso: string) => {
     setSelectedDate(iso)
@@ -97,6 +112,10 @@ export function RoomOverlapPage() {
       }
       setCelebrateMeeting(meeting)
       setPhase('celebrate')
+      if (roomId && profile) {
+        const actorName = bundle.participants[profile.participantId]?.name ?? '친구'
+        notifyFriendsMeetingConfirmed(roomId, profile.participantId, actorName, meeting)
+      }
     } catch {
       setConfirmError('약속을 저장하지 못했어요. 서버 연결을 확인해 주세요.')
     } finally {
