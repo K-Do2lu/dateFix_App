@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { CloverLogo } from '../../../components/brand/CloverLogo'
 import { Mascot } from '../../../components/brand/Mascot'
 import { useAppGuide } from '../context/AppGuideContext'
@@ -26,13 +27,21 @@ export function HomeBanner() {
             <p className="mt-2.5 max-w-[15rem] text-sm leading-relaxed text-neutral-500">
               친구들과 가능한 날을 맞춰 보세요.
             </p>
-            <button
-              type="button"
-              onClick={openGuide}
-              className="mt-3 rounded-full border border-[#55CB9F]/35 bg-white px-3.5 py-1.5 text-xs font-bold text-[#3da882] shadow-sm active:scale-[0.98]"
-            >
-              가이드
-            </button>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={openGuide}
+                className="rounded-full border border-[#55CB9F]/35 bg-white px-3.5 py-1.5 text-xs font-bold text-[#3da882] shadow-sm active:scale-[0.98]"
+              >
+                가이드
+              </button>
+              <Link
+                to="/status"
+                className="rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-bold text-neutral-600 shadow-sm active:scale-[0.98]"
+              >
+                앱 상태
+              </Link>
+            </div>
           </div>
           <Mascot size="md" className="shrink-0 -mr-1 -mb-1 w-20 opacity-95" />
         </div>

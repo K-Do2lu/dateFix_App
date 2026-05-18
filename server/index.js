@@ -21,7 +21,11 @@ app.use(cors())
 app.use(express.json({ limit: '1mb' }))
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, push: isPushConfigured() })
+  res.json({
+    ok: true,
+    push: isPushConfigured(),
+    commit: process.env.RENDER_GIT_COMMIT ?? null,
+  })
 })
 
 app.get('/api/push/vapid-public-key', (_req, res) => {
