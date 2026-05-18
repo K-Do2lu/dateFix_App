@@ -24,5 +24,5 @@ export function useRoomList(): { rooms: RoomListItem[]; loading: boolean } {
     })
   }, [refresh])
 
- return { rooms, loading }
+  return { rooms, loading }
 }
