@@ -173,6 +173,26 @@
     box-shadow: 0 0 0 3px rgb(85 203 159 / 0.18);
   }
 
+  /* iOS Safari: type=date 기본 min-width 때문에 2열 그리드가 깨짐 */
+  .cute-input-date {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .df-date-range-fields {
+    width: 100%;
+  }
+
+  @media (min-width: 420px) {
+    .df-date-range-fields {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
   .df-date-chip {
     border-radius: 9999px;
     border: 1px solid #e5e5e5;

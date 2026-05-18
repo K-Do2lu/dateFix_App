@@ -9,7 +9,7 @@ import { createRoomBundle, setLocalProfile } from '../lib/roomStore'
 const MAX_RANGE_DAYS = 120
 
 const INPUT_CLASS =
-  'cute-input placeholder:text-neutral-400 focus:ring-0'
+  'cute-input cute-input-date box-border w-full min-w-0 max-w-full placeholder:text-neutral-400 focus:ring-0'
 
 export function CreateRoomPage() {
   const navigate = useNavigate()
@@ -114,7 +114,7 @@ export function CreateRoomPage() {
             ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="df-date-range-fields grid min-w-0 grid-cols-1 gap-3">
             <CuteField label="시작일" htmlFor="date-from">
               <input
                 id="date-from"
