@@ -1,0 +1,10 @@
+---
+description: Git 커밋에 Cursor 공동 작성자를 넣지 않음
+alwaysApply: true
+---
+
+# Git 커밋 규칙
+
+- 커밋 메시지에 `Co-authored-by: Cursor` 또는 `cursoragent@cursor.com` 줄을 **절대 추가하지 마세요**.
+- `Made with Cursor` 트레일러도 추가하지 마세요.
+- 커밋 작성자는 사용자 Git 설정(`doyeon`)만 사용합니다.
