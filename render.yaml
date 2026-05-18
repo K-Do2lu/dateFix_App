@@ -8,3 +8,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      # Dashboard에서 값 입력 (npm run generate-vapid) — .env.example 참고
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
